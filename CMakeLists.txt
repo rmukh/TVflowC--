@@ -16,7 +16,7 @@ find_package (Eigen3 3.4 REQUIRED NO_MODULE)
 link_directories(${Eigen_INCLUDE_DIRS})
 
 # Make a static library of the TVflow code
-add_library(TVflow_lib SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/TVflow.cpp)
+add_library(TVflow_lib SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp)
 
 # Make a python module with an pybind11 interface
 if (NOT DEFINED pybind11_DIR)
