@@ -26,7 +26,7 @@ else()
 endif()
 
 find_package(pybind11 REQUIRED)
-pybind11_add_module(tv_flow_python ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/python_wrapper.cpp)
+pybind11_add_module(tv_flow_python MODULE ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/python_wrapper.cpp)
 target_link_libraries(tv_flow_python PUBLIC Eigen3::Eigen m)
 
 # Make an executable and link it to the static library
