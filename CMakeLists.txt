@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -O3 -pthread -fno-math-errno -mfma -ffast-math")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -pthread -fno-math-errno -mfma -ffast-math")
 
-set(CMAKE_PREFIX_PATH "D:\\Eigen3" PATH)
+if (NOT DEFINED Eigen3_DIR)
+    set(CMAKE_PREFIX_PATH "D:\\Eigen3" PATH)
+endif()
 find_package (Eigen3 3.4 REQUIRED NO_MODULE)
 link_directories(${Eigen_INCLUDE_DIRS})
 
