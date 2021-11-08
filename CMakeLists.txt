@@ -4,8 +4,8 @@ project (TVflow)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -O3 -pthread -fno-math-errno -mfma -ffast-math")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -pthread -fno-math-errno -mfma -ffast-math")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -O3 -fno-math-errno -mfma -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -fno-math-errno -mfma -ffast-math")
 
 if (NOT DEFINED Eigen3_DIR)
     set(CMAKE_PREFIX_PATH "D:\\Eigen3" PATH)
@@ -26,7 +26,7 @@ else()
 endif()
 
 find_package(pybind11 REQUIRED)
-pybind11_add_module(tv_flow_python MODULE ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/python_wrapper.cpp)
+pybind11_add_module(tv_flow_python ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/python_wrapper.cpp)
 target_link_libraries(tv_flow_python PUBLIC Eigen3::Eigen m)
 
 # Make an executable and link it to the static library
