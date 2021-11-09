@@ -34,7 +34,9 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     Eigen::MatrixXd div_out = Eigen::MatrixXd::Zero(n, m);
     Eigen::ArrayXXd norm_denom = Eigen::MatrixXd::Zero(n, m);
 
-    double told, t, dt = 1.0;
+    double told = 1.0;
+    double t = 1.0;
+    double dt = 1.0;
 
     for (int itr{0}; itr < iters; ++itr)
     {
@@ -48,7 +50,9 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         v_1 = v_hat_1 - v_1;
         v_2 = v_hat_2 - v_2;
 
-        norm_denom = (v_1.array().square() + v_2.array().square()).sqrt().cwiseMax(lmd);
+        v_1 = v_1.array().square();
+        v_2 = v_2.array().square();
+        norm_denom = (v_1 + v_2).cwiseSqrt().cwiseMax(lmd);
 
         v_1 = (lmd * v_1.array()) / norm_denom;
         v_2 = (lmd * v_2.array()) / norm_denom;
@@ -64,11 +68,16 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
             }
         }
 
-        t = (1.0 + std::sqrt(1.0 + 4.0 * told * told)) / 2.0;
-        dt = (told - 1.0) / t;
+        told = 1.0 + 4.0 * (told * told);
+        t = (1.0 + std::sqrt(told)) / 2.0;
+        told = told - 1.0;
+        dt = told / t;
 
-        v_hat_1.noalias() = v_1 + dt * d_1;
-        v_hat_2.noalias() = v_2 + dt * d_2;
+        d_1 *= dt;
+        d_2 *= dt;
+
+        v_hat_1.noalias() = v_1 + d_1;
+        v_hat_2.noalias() = v_2 + d_2;
 
         v_old_1.noalias() = v_1;
         v_old_2.noalias() = v_2;
