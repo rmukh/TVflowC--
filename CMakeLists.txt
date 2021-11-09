@@ -4,8 +4,8 @@ project (TVflow)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -O3 -pthread -flto -fno-math-errno -mfma -ffast-math")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -pthread -flto -fno-math-errno -mfma -ffast-math")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -O3 -pthread -flto -fno-math-errno -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -pthread -flto -fno-math-errno -ffast-math")
 
 if (NOT DEFINED Eigen3_DIR)
     set(CMAKE_PREFIX_PATH "D:\\Eigen3" PATH)
