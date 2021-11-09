@@ -71,7 +71,7 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
             }
         }
 
-        told_temp = 1.0 + 4.0 * (told * told);
+        told_temp = 1.0 + (4.0 * (told * told));
         t = (1.0 + std::sqrt(told_temp)) / 2.0;
         told_temp = told - 1.0;
         dt = told_temp / t;
