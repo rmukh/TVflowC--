@@ -27,6 +27,8 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
 
     Eigen::MatrixXd v_1 = Eigen::MatrixXd::Zero(n, m);
     Eigen::MatrixXd v_2 = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_1_temp = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_2_temp = Eigen::MatrixXd::Zero(n, m);
 
     Eigen::MatrixXd d_1 = Eigen::MatrixXd::Zero(n, m);
     Eigen::MatrixXd d_2 = Eigen::MatrixXd::Zero(n, m);
@@ -37,6 +39,7 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     double told = 1.0;
     double t = 1.0;
     double dt = 1.0;
+    double told_temp = 1.0;
 
     for (int itr{0}; itr < iters; ++itr)
     {
@@ -45,14 +48,14 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         div_out.noalias() -= f;
         grad(div_out, v_1, v_2, n, m);
 
-        v_1 /= 6.0;
-        v_2 /= 6.0;
-        v_1 = v_hat_1 - v_1;
-        v_2 = v_hat_2 - v_2;
+        v_1_temp.noalias() = v_1 / 6.0;
+        v_2_temp.noalias() = v_2 / 6.0;
+        v_1.noalias() = v_hat_1 - v_1_temp;
+        v_2.noalias() = v_hat_2 - v_2_temp;
 
-        v_1 = v_1.array().square();
-        v_2 = v_2.array().square();
-        norm_denom = (v_1 + v_2).cwiseSqrt().cwiseMax(lmd);
+        v_1_temp = v_1.array().square();
+        v_2_temp = v_2.array().square();
+        norm_denom = (v_1_temp + v_2_temp).cwiseSqrt().cwiseMax(lmd);
 
         v_1 = (lmd * v_1.array()) / norm_denom;
         v_2 = (lmd * v_2.array()) / norm_denom;
@@ -68,14 +71,13 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
             }
         }
 
-        told = 1.0 + 4.0 * (told * told);
-        t = (1.0 + std::sqrt(told)) / 2.0;
-        told = told - 1.0;
-        dt = told / t;
+        told_temp = 1.0 + 4.0 * (told * told);
+        t = (1.0 + std::sqrt(told_temp)) / 2.0;
+        told_temp = told - 1.0;
+        dt = told_temp / t;
 
         d_1 *= dt;
         d_2 *= dt;
-
         v_hat_1.noalias() = v_1 + d_1;
         v_hat_2.noalias() = v_2 + d_2;
 
