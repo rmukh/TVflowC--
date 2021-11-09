@@ -34,7 +34,9 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     Eigen::MatrixXd div_out = Eigen::MatrixXd::Zero(n, m);
     Eigen::ArrayXXd norm_denom = Eigen::MatrixXd::Zero(n, m);
 
-    double told, t, dt = 1.0;
+    double told = 1.0;
+    double t = 1.0;
+    double dt = 1.0;
 
     for (int itr{0}; itr < iters; ++itr)
     {
