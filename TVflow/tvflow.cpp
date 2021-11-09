@@ -43,8 +43,10 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         div_out.noalias() -= f;
         grad(div_out, v_1, v_2, n, m);
 
-        v_1 = v_hat_1 - (v_1 / 6.0);
-        v_2 = v_hat_2 - (v_2 / 6.0);
+        v_1 /= 6.0;
+        v_2 /= 6.0;
+        v_1 = v_hat_1 - v_1;
+        v_2 = v_hat_2 - v_2;
 
         norm_denom = (v_1.array().square() + v_2.array().square()).sqrt().cwiseMax(lmd);
 
@@ -95,7 +97,8 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
     tvdff(u0, u1, n, m, lami, tol, NIT);
     tvdff(u1, u2, n, m, lami, tol, NIT);
 
-    Eigen::MatrixXd phi = (1.0 / dt) * (u0 - 2 * u1 + u2);
+    u1 *= 2.0;
+    Eigen::MatrixXd phi = (1.0 / dt) * (u0 - u1 + u2);
     S(0) = phi.cwiseAbs().sum();
 
     for (int i{1}; i < NOB; ++i)
@@ -104,7 +107,8 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
         u1.noalias() = u2;
         tvdff(u1, u2, n, m, lami, tol, NIT);
 
-        phi.noalias() = (i / dt) * (u0 - 2 * u1 + u2);
+        u1 *= 2.0;
+        phi.noalias() = (i / dt) * (u0 - u1 + u2);
         S(i) = phi.cwiseAbs().sum();
     }
     return S;
