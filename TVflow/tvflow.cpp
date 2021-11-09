@@ -43,8 +43,8 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         div_out.noalias() -= f;
         grad(div_out, v_1, v_2, n, m);
 
-        v_1.noalias() = v_hat_1 - (v_1 / 6.0);
-        v_2.noalias() = v_hat_2 - (v_2 / 6.0);
+        v_1 = v_hat_1 - (v_1 / 6.0);
+        v_2 = v_hat_2 - (v_2 / 6.0);
 
         norm_denom = (v_1.array().square() + v_2.array().square()).sqrt().cwiseMax(lmd);
 
