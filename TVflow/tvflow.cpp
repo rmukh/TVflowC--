@@ -317,7 +317,8 @@ Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eig
     return S;
 }
 
-void saveData(std::string fileName, Eigen::VectorXd v)
+template <typename T>
+void saveData(std::string fileName, const T &v)
 {
     // https://eigen.tuxfamily.org/dox/structEigen_1_1IOFormat.html
     const static Eigen::IOFormat CSVFormat(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", "\n");
@@ -358,3 +359,6 @@ Eigen::MatrixXd openData(std::string fileToOpen)
 
     return Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(matrixEntries.data(), matrixRowNumber, matrixEntries.size() / matrixRowNumber);
 }
+
+template void saveData<Eigen::VectorXd>(std::string fileName, const Eigen::VectorXd &v);
+template void saveData<Eigen::MatrixX3d>(std::string fileName, const Eigen::MatrixX3d &v);

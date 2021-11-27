@@ -91,7 +91,11 @@
         "splines": "cpp",
         "dense": "cpp",
         "unordered_set": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "codecvt": "cpp",
+        "forward_list": "cpp",
+        "typeindex": "cpp",
+        "variant": "cpp"
     },
     "cmake.configureOnOpen": false
 }
