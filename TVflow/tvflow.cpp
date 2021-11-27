@@ -106,8 +106,72 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
         u1.noalias() = u2;
         tvdff(u1, u2, n, m, lami, tol, NIT);
 
-        phi.noalias() = (i / dt) * (u0 - 2 * u1 + u2);
+        phi.noalias() = ((i+1) / dt) * (u0 - 2 * u1 + u2);
         S(i) = phi.cwiseAbs().sum();
+    }
+    return S;
+}
+
+Eigen::VectorXd run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eigen::Ref<Eigen::MatrixXd> &g, const Eigen::Ref<Eigen::MatrixXd> &b, int n, int m, int NOB, double lami, double dt, double tol, int NIT)
+{
+    Eigen::MatrixX3d S(NOB);
+    S.setZero();
+
+    Eigen::MatrixXd u0_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd u0_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd u0_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd u1_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd u1_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd u1_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd u2_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd u2_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd u2_b = Eigen::MatrixXd::Zero(n, m);
+
+    u0_r = r;
+    u0_g = g;
+    u0_b = b;
+
+    tvdff(u0_r, u1_r, n, m, lami, tol, NIT);
+    tvdff(u1_r, u2_r, n, m, lami, tol, NIT);
+
+    tvdff(u0_g, u1_g, n, m, lami, tol, NIT);
+    tvdff(u1_g, u2_g, n, m, lami, tol, NIT);
+
+    tvdff(u0_b, u1_b, n, m, lami, tol, NIT);
+    tvdff(u1_b, u2_b, n, m, lami, tol, NIT);
+
+    Eigen::MatrixXd phi_r = (1.0 / dt) * (u0_r - 2 * u1_r + u2_r);
+    Eigen::MatrixXd phi_g = (1.0 / dt) * (u0_g - 2 * u1_g + u2_g);
+    Eigen::MatrixXd phi_b = (1.0 / dt) * (u0_b - 2 * u1_b + u2_b);
+
+    S(0,0) = phi_r.cwiseAbs().sum();
+    S(0,1) = phi_g.cwiseAbs().sum();
+    S(0,2) = phi_b.cwiseAbs().sum();
+
+    for (int i{1}; i < NOB; ++i)
+    {
+        u0_r.noalias() = u1_r;
+        u1_r.noalias() = u2_r;
+
+        u0_g.noalias() = u1_g;
+        u1_g.noalias() = u2_g;
+
+        u0_b.noalias() = u1_b;
+        u1_b.noalias() = u2_b;
+
+        tvdff(u1_r, u2_r, n, m, lami, tol, NIT);
+        tvdff(u1_g, u2_g, n, m, lami, tol, NIT);
+        tvdff(u1_b, u2_b, n, m, lami, tol, NIT);
+
+        phi_r.noalias() = ((i+1) / dt) * (u0_r - 2 * u1_r + u2_r);
+        phi_g.noalias() = ((i+1) / dt) * (u0_g - 2 * u1_g + u2_g);
+        phi_b.noalias() = ((i+1) / dt) * (u0_b - 2 * u1_b + u2_b);
+
+        S(i,0) = phi_r.cwiseAbs().sum();
+        S(i,1) = phi_g.cwiseAbs().sum();
+        S(i,2) = phi_b.cwiseAbs().sum();
     }
     return S;
 }
