@@ -84,6 +84,155 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     out = u.array() - u.mean() + f.mean();
 }
 
+void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen::MatrixXd> &f_g, const Eigen::Ref<Eigen::MatrixXd> &f_b, Eigen::Ref<Eigen::MatrixXd> out_r, Eigen::Ref<Eigen::MatrixXd> out_g, Eigen::Ref<Eigen::MatrixXd> out_b, int n, int m, double lmd, double tol, int iters) {
+    Eigen::MatrixXd v_old_1_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_old_2_r = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_old_1_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_old_2_g = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_old_1_b = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_old_2_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_hat_1_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_hat_2_r = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_hat_1_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_hat_2_g = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_hat_1_b = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_hat_2_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_1_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_2_r = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_1_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_2_g = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd v_1_b = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd v_2_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd d_1_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd d_2_r = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd d_1_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd d_2_g = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd d_1_b = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd d_2_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::MatrixXd div_out_r = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd div_out_g = Eigen::MatrixXd::Zero(n, m);
+    Eigen::MatrixXd div_out_b = Eigen::MatrixXd::Zero(n, m);
+
+    Eigen::ArrayXXd norm_denom = Eigen::MatrixXd::Zero(n, m);
+
+    double told = 1.0;
+    double t = 1.0;
+    double dt = 1.0;
+
+    for (int itr{0}; itr < iters; ++itr)
+    {
+        div(v_hat_1_r, v_hat_2_r, v_1_r, v_2_r, n, m);
+        div_out_r = v_1_r + v_2_r;
+        div_out_r.noalias() -= f_r;
+        grad(div_out_r, v_1_r, v_2_r, n, m);
+
+        div(v_hat_1_g, v_hat_2_g, v_1_g, v_2_g, n, m);
+        div_out_g = v_1_g + v_2_g;
+        div_out_g.noalias() -= f_g;
+        grad(div_out_g, v_1_g, v_2_g, n, m);
+
+        div(v_hat_1_b, v_hat_2_b, v_1_b, v_2_b, n, m);
+        div_out_b = v_1_b + v_2_b;
+        div_out_b.noalias() -= f_b;
+        grad(div_out_b, v_1_b, v_2_b, n, m);
+
+        v_1_r.noalias() = v_hat_1_r - (v_1_r / 6.0);
+        v_2_r.noalias() = v_hat_2_r - (v_2_r / 6.0);
+
+        v_1_g.noalias() = v_hat_1_g - (v_1_g / 6.0);
+        v_2_g.noalias() = v_hat_2_g - (v_2_g / 6.0);
+
+        v_1_b.noalias() = v_hat_1_b - (v_1_b / 6.0);
+        v_2_b.noalias() = v_hat_2_b - (v_2_b / 6.0);
+
+        norm_denom = (
+            v_1_r.array().square() + v_2_r.array().square() +
+            v_1_g.array().square() + v_2_g.array().square() + 
+            v_1_b.array().square() + v_2_b.array().square()
+            ).sqrt().cwiseMax(lmd);
+
+        v_1_r = (lmd * v_1_r.array()) / norm_denom;
+        v_2_r = (lmd * v_2_r.array()) / norm_denom;
+
+        v_1_g = (lmd * v_1_g.array()) / norm_denom;
+        v_2_g = (lmd * v_2_g.array()) / norm_denom;
+
+        v_1_b = (lmd * v_1_b.array()) / norm_denom;
+        v_2_b = (lmd * v_2_b.array()) / norm_denom;
+
+        d_1_r.noalias() = v_1_r - v_old_1_r;
+        d_2_r.noalias() = v_2_r - v_old_2_r;
+
+        d_1_g.noalias() = v_1_g - v_old_1_g;
+        d_2_g.noalias() = v_2_g - v_old_2_g;
+
+        d_1_b.noalias() = v_1_b - v_old_1_b;
+        d_2_b.noalias() = v_2_b - v_old_2_b;
+
+        if (itr % 5 == 0)
+        {
+            if (d_1_r.array().abs().maxCoeff() < tol && d_2_r.array().abs().maxCoeff() < tol && 
+                d_1_g.array().abs().maxCoeff() < tol && d_2_g.array().abs().maxCoeff() < tol &&
+                d_1_b.array().abs().maxCoeff() < tol && d_2_b.array().abs().maxCoeff() < tol)
+            {
+                break;
+            }
+        }
+
+        t = (1.0 + std::sqrt(1.0 + 4.0 * told * told)) / 2.0;
+        dt = (told - 1.0) / t;
+
+        v_hat_1_r.noalias() = v_1_r + dt * d_1_r;
+        v_hat_2_r.noalias() = v_2_r + dt * d_2_r;
+
+        v_hat_1_g.noalias() = v_1_g + dt * d_1_g;
+        v_hat_2_g.noalias() = v_2_g + dt * d_2_g;
+
+        v_hat_1_b.noalias() = v_1_b + dt * d_1_b;
+        v_hat_2_b.noalias() = v_2_b + dt * d_2_b;
+
+        v_old_1_r.noalias() = v_1_r;
+        v_old_2_r.noalias() = v_2_r;
+
+        v_old_1_g.noalias() = v_1_g;
+        v_old_2_g.noalias() = v_2_g;
+
+        v_old_1_b.noalias() = v_1_b;
+        v_old_2_b.noalias() = v_2_b;
+
+        told = t;
+    }
+
+    // use v_old as the output since it is the last iteration and we don't need them anymore
+    div(v_1_r, v_2_r, v_old_1_r, v_old_2_r, n, m);
+    div_out_r = v_old_1_r + v_old_2_r;
+    Eigen::MatrixXd u_r = f_r - div_out_r;
+
+    div(v_1_g, v_2_g, v_old_1_g, v_old_2_g, n, m);
+    div_out_g = v_old_1_g + v_old_2_g;
+    Eigen::MatrixXd u_g = f_g - div_out_g;
+
+    div(v_1_b, v_2_b, v_old_1_b, v_old_2_b, n, m);
+    div_out_b = v_old_1_b + v_old_2_b;
+    Eigen::MatrixXd u_b = f_b - div_out_b;
+
+    out_r = u_r.array() - u_r.mean() + f_r.mean();
+    out_g = u_g.array() - u_g.mean() + f_g.mean();
+    out_b = u_b.array() - u_b.mean() + f_b.mean();
+}
+
 Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, int NOB, double lami, double dt, double tol, int NIT)
 {
     Eigen::VectorXd S(NOB);
@@ -112,9 +261,9 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
     return S;
 }
 
-Eigen::VectorXd run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eigen::Ref<Eigen::MatrixXd> &g, const Eigen::Ref<Eigen::MatrixXd> &b, int n, int m, int NOB, double lami, double dt, double tol, int NIT)
+Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eigen::Ref<Eigen::MatrixXd> &g, const Eigen::Ref<Eigen::MatrixXd> &b, int n, int m, int NOB, double lami, double dt, double tol, int NIT)
 {
-    Eigen::MatrixX3d S(NOB);
+    Eigen::MatrixX3d S(NOB,3);
     S.setZero();
 
     Eigen::MatrixXd u0_r = Eigen::MatrixXd::Zero(n, m);
@@ -133,14 +282,8 @@ Eigen::VectorXd run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eige
     u0_g = g;
     u0_b = b;
 
-    tvdff(u0_r, u1_r, n, m, lami, tol, NIT);
-    tvdff(u1_r, u2_r, n, m, lami, tol, NIT);
-
-    tvdff(u0_g, u1_g, n, m, lami, tol, NIT);
-    tvdff(u1_g, u2_g, n, m, lami, tol, NIT);
-
-    tvdff(u0_b, u1_b, n, m, lami, tol, NIT);
-    tvdff(u1_b, u2_b, n, m, lami, tol, NIT);
+    tvdff_color(u0_r, u0_g, u0_b, u1_r, u1_g, u1_b, n, m, lami, tol, NIT);
+    tvdff_color(u1_r, u1_g, u1_b, u2_r, u2_g, u2_b, n, m, lami, tol, NIT);
 
     Eigen::MatrixXd phi_r = (1.0 / dt) * (u0_r - 2 * u1_r + u2_r);
     Eigen::MatrixXd phi_g = (1.0 / dt) * (u0_g - 2 * u1_g + u2_g);
@@ -161,9 +304,7 @@ Eigen::VectorXd run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eige
         u0_b.noalias() = u1_b;
         u1_b.noalias() = u2_b;
 
-        tvdff(u1_r, u2_r, n, m, lami, tol, NIT);
-        tvdff(u1_g, u2_g, n, m, lami, tol, NIT);
-        tvdff(u1_b, u2_b, n, m, lami, tol, NIT);
+        tvdff_color(u1_r, u1_g, u1_b, u2_r, u2_g, u2_b, n, m, lami, tol, NIT);
 
         phi_r.noalias() = ((i+1) / dt) * (u0_r - 2 * u1_r + u2_r);
         phi_g.noalias() = ((i+1) / dt) * (u0_g - 2 * u1_g + u2_g);
