@@ -14,15 +14,15 @@ int main(int argc, char *argv[])
   int W{std::stoi(argv[2])};
   int H{std::stoi(argv[3])};
 
-  float T = 10.0;
-  float dt = 1.0 / 50.0;
+  double T = 10.0;
+  double dt = 1.0 / 50.0;
 
   int NOB = int(ceil(T / dt));
 
   int NIT = 100;
-  float tol = 1e-5;
+  double tol = 1e-5;
 
-  float lami = 2 * dt;
+  double lami = 2 * dt;
 
   std::chrono::duration<double> diff{};
   if (std::stoi(argv[1]) == 0) {
