@@ -48,7 +48,7 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         v_1.noalias() = v_hat_1 - (v_1 / 6.0);
         v_2.noalias() = v_hat_2 - (v_2 / 6.0);
 
-        norm_denom = (v_1.array().square() + v_2.array().square()).sqrt().cwiseMax(lmd);
+        norm_denom = ((v_1.array().square() + v_2.array().square()).sqrt()).cwiseMax(lmd);
 
         v_1 = (lmd * v_1.array()) / norm_denom;
         v_2 = (lmd * v_2.array()) / norm_denom;
@@ -58,7 +58,7 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
 
         if (itr % 5 == 0)
         {
-            if (d_1.array().abs().maxCoeff() < tol && d_2.array().abs().maxCoeff() < tol)
+            if ((d_1.array().abs()).maxCoeff() < tol && (d_2.array().abs()).maxCoeff() < tol)
             {
                 break;
             }
@@ -157,11 +157,11 @@ void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen:
         v_1_b.noalias() = v_hat_1_b - (v_1_b / 6.0);
         v_2_b.noalias() = v_hat_2_b - (v_2_b / 6.0);
 
-        norm_denom = (
+        norm_denom = ((
             v_1_r.array().square() + v_2_r.array().square() +
             v_1_g.array().square() + v_2_g.array().square() + 
             v_1_b.array().square() + v_2_b.array().square()
-            ).sqrt().cwiseMax(lmd);
+            ).sqrt()).cwiseMax(lmd);
 
         v_1_r = (lmd * v_1_r.array()) / norm_denom;
         v_2_r = (lmd * v_2_r.array()) / norm_denom;
@@ -183,9 +183,9 @@ void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen:
 
         if (itr % 5 == 0)
         {
-            if (d_1_r.array().abs().maxCoeff() < tol && d_2_r.array().abs().maxCoeff() < tol && 
-                d_1_g.array().abs().maxCoeff() < tol && d_2_g.array().abs().maxCoeff() < tol &&
-                d_1_b.array().abs().maxCoeff() < tol && d_2_b.array().abs().maxCoeff() < tol)
+            if ((d_1_r.array().abs()).maxCoeff() < tol && (d_2_r.array().abs()).maxCoeff() < tol && 
+                (d_1_g.array().abs()).maxCoeff() < tol && (d_2_g.array().abs()).maxCoeff() < tol &&
+                (d_1_b.array().abs()).maxCoeff() < tol && (d_2_b.array().abs()).maxCoeff() < tol)
             {
                 break;
             }
@@ -247,7 +247,7 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
     tvdff(u1, u2, n, m, lami, tol, NIT);
 
     Eigen::MatrixXd phi = (1.0 / dt) * (u0 - 2 * u1 + u2);
-    S(0) = phi.cwiseAbs().sum();
+    S(0) = (phi.cwiseAbs()).sum();
 
     for (int i{1}; i < NOB; ++i)
     {
@@ -256,7 +256,7 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
         tvdff(u1, u2, n, m, lami, tol, NIT);
 
         phi.noalias() = ((i+1) / dt) * (u0 - 2 * u1 + u2);
-        S(i) = phi.cwiseAbs().sum();
+        S(i) = (phi.cwiseAbs()).sum();
     }
     return S;
 }
@@ -289,9 +289,9 @@ Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eig
     Eigen::MatrixXd phi_g = (1.0 / dt) * (u0_g - 2 * u1_g + u2_g);
     Eigen::MatrixXd phi_b = (1.0 / dt) * (u0_b - 2 * u1_b + u2_b);
 
-    S(0,0) = phi_r.cwiseAbs().sum();
-    S(0,1) = phi_g.cwiseAbs().sum();
-    S(0,2) = phi_b.cwiseAbs().sum();
+    S(0,0) = (phi_r.cwiseAbs()).sum();
+    S(0,1) = (phi_g.cwiseAbs()).sum();
+    S(0,2) = (phi_b.cwiseAbs()).sum();
 
     for (int i{1}; i < NOB; ++i)
     {
@@ -310,9 +310,9 @@ Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eig
         phi_g.noalias() = ((i+1) / dt) * (u0_g - 2 * u1_g + u2_g);
         phi_b.noalias() = ((i+1) / dt) * (u0_b - 2 * u1_b + u2_b);
 
-        S(i,0) = phi_r.cwiseAbs().sum();
-        S(i,1) = phi_g.cwiseAbs().sum();
-        S(i,2) = phi_b.cwiseAbs().sum();
+        S(i,0) = (phi_r.cwiseAbs()).sum();
+        S(i,1) = (phi_g.cwiseAbs()).sum();
+        S(i,2) = (phi_b.cwiseAbs()).sum();
     }
     return S;
 }
