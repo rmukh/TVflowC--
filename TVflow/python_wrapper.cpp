@@ -11,6 +11,7 @@ using namespace pybind11::literals;
 
 PYBIND11_MODULE(tv_flow_python, m) {
     m.doc() = "TV flow computation for gray-scale images";
+    m.def("derivative_index_2D", &derivative_index_2D, "Compute the indices of the derivatives of an image");
     m.def("run_TV_flow", &run_TV_flow, "Function to run the whole process of spectre estimation using TV flow");
     m.def("run_TV_flow_RGB", &run_TV_flow_RGB, "Function to run the whole process of spectre estimation using TV flow on RGB images");
     m.def("grad", &grad, "Function to compute the gradient of an image");
