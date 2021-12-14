@@ -5,6 +5,73 @@
 #include <vector>
 #include "math.h"
 
+void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Eigen::MatrixX4d> &derivative_index)
+{
+    unsigned long *I, nm, i, j, k, l, N, vi, vj;
+
+    nm = image.rows() * image.cols();
+
+    I = new unsigned long[nm];
+
+    k = 0;
+    for (i = 0; i < nm; i++)
+    {
+        I[k] = i;
+        k++;
+    }
+
+    for (i = 0; i < N; i++)
+    {
+        for (j = 0; j < 4; j++)
+        {
+            derivative_index(i, j) = (double)i;
+        }
+    }
+
+    i = 0;
+    for (k = 0; k < nm; k++)
+    {
+        vi = k % image.rows();
+        vj = (k - vi) / image.rows();
+
+        if (vi != image.rows() - 1)
+        {
+            derivative_index(i, 0) = (double)(i + 1);
+        }
+
+        if (vi != 0)
+        {
+            derivative_index(i, 1) = (double)(i - 1);
+        }
+
+        if (vj != image.cols() - 1)
+        {
+            l = k + image.rows();
+            j = 0;
+            while (I[i + j] < l)
+            {
+                j++;
+            }
+            derivative_index(i, 2) = (double)(i + j);
+        }
+
+        if (vj != 0)
+        {
+            l = k - image.rows();
+            j = 0;
+            while (I[i - j] > l)
+            {
+                j++;
+            }
+            derivative_index(i, 3) = (double)(i - j);
+        }
+
+        i++;
+    }
+
+    delete[] I;
+}
+
 void grad(const Eigen::Ref<Eigen::MatrixXd> &img, Eigen::Ref<Eigen::MatrixXd> out1, Eigen::Ref<Eigen::MatrixXd> out2, int n, int m)
 {
     out1 << img(Eigen::seq(1, n - 1), Eigen::all) - img(Eigen::seq(0, n - 2), Eigen::all), Eigen::MatrixXd::Zero(1, m);
@@ -84,7 +151,8 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     out = u.array() - u.mean() + f.mean();
 }
 
-void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen::MatrixXd> &f_g, const Eigen::Ref<Eigen::MatrixXd> &f_b, Eigen::Ref<Eigen::MatrixXd> out_r, Eigen::Ref<Eigen::MatrixXd> out_g, Eigen::Ref<Eigen::MatrixXd> out_b, int n, int m, double lmd, double tol, int iters) {
+void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen::MatrixXd> &f_g, const Eigen::Ref<Eigen::MatrixXd> &f_b, Eigen::Ref<Eigen::MatrixXd> out_r, Eigen::Ref<Eigen::MatrixXd> out_g, Eigen::Ref<Eigen::MatrixXd> out_b, int n, int m, double lmd, double tol, int iters)
+{
     Eigen::MatrixXd v_old_1_r = Eigen::MatrixXd::Zero(n, m);
     Eigen::MatrixXd v_old_2_r = Eigen::MatrixXd::Zero(n, m);
 
@@ -158,10 +226,11 @@ void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen:
         v_2_b.noalias() = v_hat_2_b - (v_2_b / 6.0);
 
         norm_denom = ((
-            v_1_r.array().square() + v_2_r.array().square() +
-            v_1_g.array().square() + v_2_g.array().square() + 
-            v_1_b.array().square() + v_2_b.array().square()
-            ).sqrt()).cwiseMax(lmd);
+                          v_1_r.array().square() + v_2_r.array().square() +
+                          v_1_g.array().square() + v_2_g.array().square() +
+                          v_1_b.array().square() + v_2_b.array().square())
+                          .sqrt())
+                         .cwiseMax(lmd);
 
         v_1_r = (lmd * v_1_r.array()) / norm_denom;
         v_2_r = (lmd * v_2_r.array()) / norm_denom;
@@ -183,7 +252,7 @@ void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen:
 
         if (itr % 5 == 0)
         {
-            if ((d_1_r.array().abs()).maxCoeff() < tol && (d_2_r.array().abs()).maxCoeff() < tol && 
+            if ((d_1_r.array().abs()).maxCoeff() < tol && (d_2_r.array().abs()).maxCoeff() < tol &&
                 (d_1_g.array().abs()).maxCoeff() < tol && (d_2_g.array().abs()).maxCoeff() < tol &&
                 (d_1_b.array().abs()).maxCoeff() < tol && (d_2_b.array().abs()).maxCoeff() < tol)
             {
@@ -255,7 +324,7 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
         u1.noalias() = u2;
         tvdff(u1, u2, n, m, lami, tol, NIT);
 
-        phi.noalias() = ((i+1) / dt) * (u0 - 2 * u1 + u2);
+        phi.noalias() = ((i + 1) / dt) * (u0 - 2 * u1 + u2);
         S(i) = (phi.cwiseAbs()).sum();
     }
     return S;
@@ -263,7 +332,7 @@ Eigen::VectorXd run_TV_flow(const Eigen::Ref<Eigen::MatrixXd> &f, int n, int m, 
 
 Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eigen::Ref<Eigen::MatrixXd> &g, const Eigen::Ref<Eigen::MatrixXd> &b, int n, int m, int NOB, double lami, double dt, double tol, int NIT)
 {
-    Eigen::MatrixX3d S(NOB,3);
+    Eigen::MatrixX3d S(NOB, 3);
     S.setZero();
 
     Eigen::MatrixXd u0_r = Eigen::MatrixXd::Zero(n, m);
@@ -289,9 +358,9 @@ Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eig
     Eigen::MatrixXd phi_g = (1.0 / dt) * (u0_g - 2 * u1_g + u2_g);
     Eigen::MatrixXd phi_b = (1.0 / dt) * (u0_b - 2 * u1_b + u2_b);
 
-    S(0,0) = (phi_r.cwiseAbs()).sum();
-    S(0,1) = (phi_g.cwiseAbs()).sum();
-    S(0,2) = (phi_b.cwiseAbs()).sum();
+    S(0, 0) = (phi_r.cwiseAbs()).sum();
+    S(0, 1) = (phi_g.cwiseAbs()).sum();
+    S(0, 2) = (phi_b.cwiseAbs()).sum();
 
     for (int i{1}; i < NOB; ++i)
     {
@@ -306,13 +375,13 @@ Eigen::MatrixX3d run_TV_flow_RGB(const Eigen::Ref<Eigen::MatrixXd> &r, const Eig
 
         tvdff_color(u1_r, u1_g, u1_b, u2_r, u2_g, u2_b, n, m, lami, tol, NIT);
 
-        phi_r.noalias() = ((i+1) / dt) * (u0_r - 2 * u1_r + u2_r);
-        phi_g.noalias() = ((i+1) / dt) * (u0_g - 2 * u1_g + u2_g);
-        phi_b.noalias() = ((i+1) / dt) * (u0_b - 2 * u1_b + u2_b);
+        phi_r.noalias() = ((i + 1) / dt) * (u0_r - 2 * u1_r + u2_r);
+        phi_g.noalias() = ((i + 1) / dt) * (u0_g - 2 * u1_g + u2_g);
+        phi_b.noalias() = ((i + 1) / dt) * (u0_b - 2 * u1_b + u2_b);
 
-        S(i,0) = (phi_r.cwiseAbs()).sum();
-        S(i,1) = (phi_g.cwiseAbs()).sum();
-        S(i,2) = (phi_b.cwiseAbs()).sum();
+        S(i, 0) = (phi_r.cwiseAbs()).sum();
+        S(i, 1) = (phi_g.cwiseAbs()).sum();
+        S(i, 2) = (phi_b.cwiseAbs()).sum();
     }
     return S;
 }
