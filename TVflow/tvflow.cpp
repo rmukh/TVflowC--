@@ -5,13 +5,13 @@
 #include <vector>
 #include "math.h"
 
-void grad(const Eigen::Ref<Eigen::MatrixXd> &img, Eigen::Ref<Eigen::MatrixXd> out1, Eigen::Ref<Eigen::MatrixXd> out2, int n, int m)
+void grad(const Eigen::Ref<Eigen::MatrixXd> &img, Eigen::Ref<Eigen::ArrayXXd> out1, Eigen::Ref<Eigen::ArrayXXd> out2, int n, int m)
 {
     out1 << img(Eigen::seq(1, n - 1), Eigen::all) - img(Eigen::seq(0, n - 2), Eigen::all), Eigen::MatrixXd::Zero(1, m);
     out2 << img(Eigen::all, Eigen::seq(1, m - 1)) - img(Eigen::all, Eigen::seq(0, m - 2)), Eigen::MatrixXd::Zero(n, 1);
 }
 
-void div(const Eigen::Ref<Eigen::MatrixXd> &g1, const Eigen::Ref<Eigen::MatrixXd> &g2, Eigen::Ref<Eigen::MatrixXd> out1, Eigen::Ref<Eigen::MatrixXd> out2, int n, int m)
+void div(const Eigen::Ref<Eigen::ArrayXXd> &g1, const Eigen::Ref<Eigen::ArrayXXd> &g2, Eigen::Ref<Eigen::ArrayXXd> out1, Eigen::Ref<Eigen::ArrayXXd> out2, int n, int m)
 {
     out1 << -g1(0, Eigen::all), g1(Eigen::seq(0, n - 3), Eigen::all) - g1(Eigen::seq(1, n - 2), Eigen::all), g1(n - 1, Eigen::all);
     out2 << -g2(Eigen::all, 0), g2(Eigen::all, Eigen::seq(0, m - 3)) - g2(Eigen::all, Eigen::seq(1, m - 2)), g2(Eigen::all, m - 1);
@@ -19,17 +19,17 @@ void div(const Eigen::Ref<Eigen::MatrixXd> &g1, const Eigen::Ref<Eigen::MatrixXd
 
 void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out, int n, int m, double lmd, double tol, int iters)
 {
-    Eigen::MatrixXd v_old_1 = Eigen::MatrixXd::Zero(n, m);
-    Eigen::MatrixXd v_old_2 = Eigen::MatrixXd::Zero(n, m);
+    Eigen::ArrayXXd v_old_1 = Eigen::ArrayXXd::Zero(n, m);
+    Eigen::ArrayXXd v_old_2 = Eigen::ArrayXXd::Zero(n, m);
 
-    Eigen::MatrixXd v_hat_1 = Eigen::MatrixXd::Zero(n, m);
-    Eigen::MatrixXd v_hat_2 = Eigen::MatrixXd::Zero(n, m);
+    Eigen::ArrayXXd v_hat_1 = Eigen::ArrayXXd::Zero(n, m);
+    Eigen::ArrayXXd v_hat_2 = Eigen::ArrayXXd::Zero(n, m);
 
-    Eigen::MatrixXd v_1 = Eigen::MatrixXd::Zero(n, m);
-    Eigen::MatrixXd v_2 = Eigen::MatrixXd::Zero(n, m);
+    Eigen::ArrayXXd v_1 = Eigen::ArrayXXd::Zero(n, m);
+    Eigen::ArrayXXd v_2 = Eigen::ArrayXXd::Zero(n, m);
 
-    Eigen::MatrixXd d_1 = Eigen::MatrixXd::Zero(n, m);
-    Eigen::MatrixXd d_2 = Eigen::MatrixXd::Zero(n, m);
+    Eigen::ArrayXXd d_1 = Eigen::ArrayXXd::Zero(n, m);
+    Eigen::ArrayXXd d_2 = Eigen::ArrayXXd::Zero(n, m);
 
     Eigen::MatrixXd div_out = Eigen::MatrixXd::Zero(n, m);
     Eigen::ArrayXXd norm_denom = Eigen::MatrixXd::Zero(n, m);
@@ -45,20 +45,20 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         div_out.noalias() -= f;
         grad(div_out, v_1, v_2, n, m);
 
-        v_1.noalias() = v_hat_1 - (v_1 / 6.0);
-        v_2.noalias() = v_hat_2 - (v_2 / 6.0);
+        v_1 = v_hat_1 - (v_1 / 6.0);
+        v_2 = v_hat_2 - (v_2 / 6.0);
 
-        norm_denom = ((v_1.array().square() + v_2.array().square()).sqrt()).cwiseMax(lmd);
+        norm_denom = ((v_1.square() + v_2.square()).sqrt()).cwiseMax(lmd);
 
-        v_1 = (lmd * v_1.array()) / norm_denom;
-        v_2 = (lmd * v_2.array()) / norm_denom;
+        v_1 = (lmd * v_1) / norm_denom;
+        v_2 = (lmd * v_2) / norm_denom;
 
-        d_1.noalias() = v_1 - v_old_1;
-        d_2.noalias() = v_2 - v_old_2;
+        d_1 = v_1 - v_old_1;
+        d_2 = v_2 - v_old_2;
 
         if (itr % 5 == 0)
         {
-            if ((d_1.array().abs()).maxCoeff() < tol && (d_2.array().abs()).maxCoeff() < tol)
+            if ((d_1.abs()).maxCoeff() < tol && (d_2.abs()).maxCoeff() < tol)
             {
                 break;
             }
@@ -67,11 +67,11 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
         t = (1.0 + std::sqrt(1.0 + 4.0 * told * told)) / 2.0;
         dt = (told - 1.0) / t;
 
-        v_hat_1.noalias() = v_1 + dt * d_1;
-        v_hat_2.noalias() = v_2 + dt * d_2;
+        v_hat_1 = v_1 + dt * d_1;
+        v_hat_2 = v_2 + dt * d_2;
 
-        v_old_1.noalias() = v_1;
-        v_old_2.noalias() = v_2;
+        v_old_1 = v_1;
+        v_old_2 = v_2;
 
         told = t;
     }
@@ -79,9 +79,9 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     // use v_old as the output since it is the last iteration and we don't need them anymore
     div(v_1, v_2, v_old_1, v_old_2, n, m);
     div_out = v_old_1 + v_old_2;
-    Eigen::MatrixXd u = f - div_out;
+    Eigen::ArrayXXd u = f - div_out;
 
-    out = u.array() - u.mean() + f.mean();
+    out = u - u.mean() + f.mean();
 }
 
 void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen::MatrixXd> &f_g, const Eigen::Ref<Eigen::MatrixXd> &f_b, Eigen::Ref<Eigen::MatrixXd> out_r, Eigen::Ref<Eigen::MatrixXd> out_g, Eigen::Ref<Eigen::MatrixXd> out_b, int n, int m, double lmd, double tol, int iters) {
