@@ -141,9 +141,10 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     out = u.array() - u.mean() + f.mean();
 }
 
-void tvdff_fast(Eigen::Ref<Eigen::MatrixXd> &f, const Eigen::Ref<Eigen::MatrixX4d> &ind_derivatives, Eigen::Ref<Eigen::MatrixXd> out, unsigned long int width, double lmd, double tol, unsigned long int iters)
+void tvdff_fast(Eigen::Ref<Eigen::MatrixXd> &f, const Eigen::Ref<Eigen::MatrixX4i> &ind_derivatives, Eigen::Ref<Eigen::MatrixXd> out, unsigned long int width, double lmd, double tol, unsigned long int iters)
 {
-    unsigned long int k{}, i{}, j1{}, j2{};
+    int j1{}, j2{};
+    unsigned int k{}, i{};
     double e{}, z1{}, z2{}, Dt;
     double *z{}, *p1{}, *p2{}, *dp{}, *dpo{};
 
@@ -173,8 +174,8 @@ void tvdff_fast(Eigen::Ref<Eigen::MatrixXd> &f, const Eigen::Ref<Eigen::MatrixX4
 
         for (k = 0; k < der_size; k++)
         {
-            j1 = (unsigned long)ind_derivatives(k, 2);
-            j2 = (unsigned long)ind_derivatives(k, 0);
+            j1 = ind_derivatives(k, 2);
+            j2 = ind_derivatives(k, 0);
 
             z1 = z[j1] - z[k];
             z2 = z[j2] - z[k];
@@ -187,8 +188,8 @@ void tvdff_fast(Eigen::Ref<Eigen::MatrixXd> &f, const Eigen::Ref<Eigen::MatrixX4
         e = 0;
         for (k = 0; k < der_size; k++)
         {
-            j1 = (unsigned long)ind_derivatives(k, 3);
-            j2 = (unsigned long)ind_derivatives(k, 1);
+            j1 = ind_derivatives(k, 3);
+            j2 = ind_derivatives(k, 1);
 
             dp[k] = (p1[k] - p1[j1]) + (p2[k] - p2[j2]);
 
