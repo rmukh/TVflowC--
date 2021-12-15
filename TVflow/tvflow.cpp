@@ -5,13 +5,13 @@
 #include <vector>
 #include "math.h"
 
-void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Eigen::MatrixX4d> &derivative_index)
+void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Eigen::MatrixX4i> &derivative_index)
 {
-    unsigned long int *I{}, nm{}, i{}, j{}, k{}, l{}, N{}, vi{}, vj{};
+    int *I{}, nm{}, i{}, j{}, k{}, l{}, vi{}, vj{};
 
     nm = image.rows() * image.cols();
 
-    I = new unsigned long int[nm];
+    I = new int[nm];
 
     k = 0;
     for (i = 0; i < nm; i++)
@@ -20,13 +20,9 @@ void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Ei
         k++;
     }
 
-    for (i = 0; i < N; i++)
-    {
+    for (i = 0; i < nm; i++)
         for (j = 0; j < 4; j++)
-        {
-            derivative_index(i, j) = (double)i;
-        }
-    }
+            derivative_index(i, j) = i;
 
     i = 0;
     for (k = 0; k < nm; k++)
@@ -35,24 +31,19 @@ void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Ei
         vj = (k - vi) / image.rows();
 
         if (vi != image.rows() - 1)
-        {
-            derivative_index(i, 0) = (double)(i + 1);
-        }
+            derivative_index(i, 0) = (i + 1);
 
         if (vi != 0)
-        {
-            derivative_index(i, 1) = (double)(i - 1);
-        }
+            derivative_index(i, 1) = (i - 1);
 
         if (vj != image.cols() - 1)
         {
             l = k + image.rows();
             j = 0;
             while (I[i + j] < l)
-            {
                 j++;
-            }
-            derivative_index(i, 2) = (double)(i + j);
+
+            derivative_index(i, 2) = (i + j);
         }
 
         if (vj != 0)
@@ -60,10 +51,9 @@ void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Ei
             l = k - image.rows();
             j = 0;
             while (I[i - j] > l)
-            {
                 j++;
-            }
-            derivative_index(i, 3) = (double)(i - j);
+
+            derivative_index(i, 3) = (i - j);
         }
 
         i++;
