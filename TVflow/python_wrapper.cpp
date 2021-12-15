@@ -16,5 +16,6 @@ PYBIND11_MODULE(tv_flow_python, m) {
     m.def("run_TV_flow_RGB", &run_TV_flow_RGB, "Function to run the whole process of spectre estimation using TV flow on RGB images");
     m.def("grad", &grad, "Function to compute the gradient of an image");
     m.def("tvdff", &tvdff, "single step via TV denoising");
+    m.def("tfdff_fast", &tvdff_fast, "single step via TV denoising, fast version");
     m.def("tvdff_color", &tvdff_color, "single step via TV denoising on RGB images");
 }

@@ -7,11 +7,11 @@
 
 void derivative_index_2D(const Eigen::Ref<Eigen::MatrixXd> &image, Eigen::Ref<Eigen::MatrixX4d> &derivative_index)
 {
-    unsigned long *I, nm, i, j, k, l, N, vi, vj;
+    unsigned long int *I{}, nm{}, i{}, j{}, k{}, l{}, N{}, vi{}, vj{};
 
     nm = image.rows() * image.cols();
 
-    I = new unsigned long[nm];
+    I = new unsigned long int[nm];
 
     k = 0;
     for (i = 0; i < nm; i++)
@@ -149,6 +149,78 @@ void tvdff(const Eigen::Ref<Eigen::MatrixXd> &f, Eigen::Ref<Eigen::MatrixXd> out
     Eigen::MatrixXd u = f - div_out;
 
     out = u.array() - u.mean() + f.mean();
+}
+
+void tvdff_fast(Eigen::Ref<Eigen::MatrixXd> &f, const Eigen::Ref<Eigen::MatrixX4d> &ind_derivatives, Eigen::Ref<Eigen::MatrixXd> out, unsigned long int width, double lmd, double tol, unsigned long int iters)
+{
+    unsigned long int k{}, i{}, j1{}, j2{};
+    double e{}, z1{}, z2{}, Dt;
+    double *z{}, *p1{}, *p2{}, *dp{}, *dpo{};
+
+    unsigned int der_size = ind_derivatives.rows();
+    z = new double[der_size];
+    p1 = new double[der_size];
+    p2 = new double[der_size];
+    dp = new double[der_size];
+    dpo = new double[der_size];
+
+    e = 1;
+    for (k = 0; k < der_size; k++)
+    {
+        dp[k] = p1[k] = p2[k] = 0;
+        f(k % width, k / width) *= lmd;
+    }
+
+    i = 0;
+    while ((i < iters) && (e > tol))
+    {
+
+        for (k = 0; k < der_size; k++)
+        {
+            dpo[k] = dp[k];
+            z[k] = dp[k] - f(k % width, k / width);
+        }
+
+        for (k = 0; k < der_size; k++)
+        {
+            j1 = (unsigned long)ind_derivatives(k, 2);
+            j2 = (unsigned long)ind_derivatives(k, 0);
+
+            z1 = z[j1] - z[k];
+            z2 = z[j2] - z[k];
+
+            Dt = 1 + 0.25 * sqrt(z1 * z1 + z2 * z2);
+            p1[k] = (p1[k] + 0.25 * z1) / Dt;
+            p2[k] = (p2[k] + 0.25 * z2) / Dt;
+        }
+
+        e = 0;
+        for (k = 0; k < der_size; k++)
+        {
+            j1 = (unsigned long)ind_derivatives(k, 3);
+            j2 = (unsigned long)ind_derivatives(k, 1);
+
+            dp[k] = (p1[k] - p1[j1]) + (p2[k] - p2[j2]);
+
+            Dt = (dp[k] >= dpo[k]) ? (dp[k] - dpo[k]) : (dpo[k] - dp[k]);
+            if (Dt > e)
+                e = Dt;
+        }
+
+        i++;
+    }
+
+    for (k = 0; k < der_size; k++)
+    {
+        out(k % width, k / width) = (f(k % width, k / width) - dp[k]) / lmd;
+        f(k % width, k / width) /= lmd;
+    }
+
+    delete[] z;
+    delete[] p1;
+    delete[] p2;
+    delete[] dp;
+    delete[] dpo;
 }
 
 void tvdff_color(const Eigen::Ref<Eigen::MatrixXd> &f_r, const Eigen::Ref<Eigen::MatrixXd> &f_g, const Eigen::Ref<Eigen::MatrixXd> &f_b, Eigen::Ref<Eigen::MatrixXd> out_r, Eigen::Ref<Eigen::MatrixXd> out_g, Eigen::Ref<Eigen::MatrixXd> out_b, int n, int m, double lmd, double tol, int iters)
