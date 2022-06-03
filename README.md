@@ -32,3 +32,5 @@ It will automatically invoke building process
 You can learn the most basic usage example in examples/main_gray_test.py
 
 It requres: matplotlib and Pillow libraries to be installed
+
+More details you can find by https://rinatm.com/total-variation-flow-implementation-in-c-c/
