@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.8)
-project (TVflow)
+project (tv_flow_python)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,13 +19,7 @@ link_directories(${Eigen_INCLUDE_DIRS})
 add_library(TVflow_lib SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp)
 
 # Make a python module with an pybind11 interface
-if (NOT DEFINED pybind11_DIR)
-    set(CMAKE_PREFIX_PATH "D:\\pybind11\\share\\cmake\\pybind11" PATH)
-else()
-    message(STATUS "pybind11_DIR is defined in " ${pybind11_DIR})
-endif()
-
-find_package(pybind11 REQUIRED)
+add_subdirectory(pybind11)
 pybind11_add_module(tv_flow_python ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/python_wrapper.cpp)
 target_link_libraries(tv_flow_python PUBLIC Eigen3::Eigen)
 
