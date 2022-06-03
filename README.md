@@ -9,15 +9,16 @@ Eigen3 library. It must be 'installed' first before buidling or running python i
 The simples procedure to build the project after clonning is:
 
 ### Windows
-`cd TVflowC--`
-`mkdir build`
-`cd build`
-`cmake .. -DEigen3_DIR=path/to/installed/eigen3`
-
+```cd TVflowC--
+mkdir build
+cd build
+`cmake .. -DEigen3_DIR=path/to/installed/eigen3
+```
 ### Linux/macOS
-`cd TVflowC--`
-`mkdir build`
-`cd build`
-`cmake ..` optionally might require `-DEigen3_DIR=path/to/installed/eigen3`
-`cmake --build . -j #number_of_threads`
-`cmake install --build`
+```cd TVflowC--
+mkdir build
+cd build
+cmake .. optionally might require -DEigen3_DIR=path/to/installed/eigen3
+cmake --build . -j #number_of_threads
+cmake install --build
+```
