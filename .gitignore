@@ -9,3 +9,5 @@
 .history/
 build/
 pybind11/build
+
+tv_flow_python.egg-info/

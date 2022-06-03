@@ -9,6 +9,12 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi /nologo /Gm- /W3 /WX /EHsc /GS /fp:fast /permissive- /Zc:wchar_t /Zc:forScope /Zc:inline /Gd /TP")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FC /wd4996")
 
+    if(MSVC_VERSION GREATER_EQUAL 1925)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /experimental:preprocessor")
+    endif()
+
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /RTC1 /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /Gy- /MD")
 
@@ -34,6 +40,7 @@ add_library(TVflow_lib SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp)
 add_subdirectory(pybind11)
 pybind11_add_module(tv_flow_python ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/tvflow.cpp ${CMAKE_CURRENT_SOURCE_DIR}/TVflow/python_wrapper.cpp)
 target_link_libraries(tv_flow_python PUBLIC Eigen3::Eigen)
+target_compile_definitions(tv_flow_python PUBLIC VERSION_INFO=${PACKAGE_VERSION_INFO})
 
 # Make an executable and link it to the library
 add_executable(main main.cpp)
