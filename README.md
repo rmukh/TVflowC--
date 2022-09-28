@@ -3,17 +3,17 @@ Total Variation (TV) flow implementation in C/C++
 ```
 git clone --recursive https://github.com/rmukh/TVflowC--.git
 ```
-## Pre-requesties
-Eigen3 library. It must be 'installed' first before buidling or running python installation (it invokes building process).
+## Pre-requisites
+Eigen3 library. It must be 'installed' before building or running python installation (it invokes the building process).
 [The simplies instruction](https://robots.uc3m.es/installation-guides/install-eigen.html)
 
 ## Installation
-You can install python package as 
+You can install the python package as 
 ```
 cd TVflowC--
 python -m pip install .
 ```
-It will automatically invoke building process
+It will automatically invoke the building process.
 
 ## Building
 The simples procedure to build the project as a shared library with python build is:
@@ -30,6 +30,6 @@ cmake install --build
 ## Examples
 You can learn the most basic usage example in examples/main_gray_test.py
 
-It requres: matplotlib and Pillow libraries to be installed
+It requires: matplotlib and Pillow libraries to be installed
 
-More details you can find by [https://rinatm.com/total-variation-flow-implementation-in-c-c/](https://rinatm.com/total-variation-flow-implementation/)
+More details you can find at [https://rinatm.com/total-variation-flow-implementation-in-c-c/](https://rinatm.com/total-variation-flow-implementation/)
